@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CustomerModule } from './customer/customer.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CustomerSupportModule } from './customerSupport/customerSupport.module';
 
 @Module({
-  imports: [CustomerModule,TypeOrmModule.forRoot({
+  imports: [CustomerModule,CustomerSupportModule,TypeOrmModule.forRoot({
     type: 'postgres',
     host: 'localhost',
     port: 5432,
