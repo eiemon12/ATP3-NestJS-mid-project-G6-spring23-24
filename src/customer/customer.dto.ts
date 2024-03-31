@@ -1,6 +1,6 @@
 import { Matches } from "class-validator";
-//import { IsJpeg } from "class-validator";
 import { IsEmail, IsString,IsNotEmpty,Length,IsEnum} from "class-validator";
+import { Entity, PrimaryGeneratedColumn, Column ,OneToOne,OneToMany} from 'typeorm';
 
 
 enum Gender {
@@ -11,12 +11,13 @@ enum Gender {
 export class CustomerDTO{
 
 
-    @IsNotEmpty({message: 'Please enter a valid id'})
-    @Length(4,10)
+    @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
     id:number;
 
     @IsNotEmpty({message: 'Please enter a valid name'})
     @IsString({message: 'Please enter a string name'})
+    @Matches(/^[^\d]+$/, { message: 'Name should not contain numbers' })
+    @Length(4,100)
     fullName:string;
 
 
@@ -28,7 +29,7 @@ export class CustomerDTO{
 
     @IsString()
     @IsEmail({},{message: 'Please enter a valid email'})
-    @Matches(/@aiub\.edu$/, { message: 'Email must be from aiub.edu domain' })
+    @Matches(/.com$/, { message: 'Email must be from .com domain' })
     email:string;
 
     @IsNotEmpty({message: 'Please enter a valid password'})
@@ -42,20 +43,16 @@ export class CustomerDTO{
     gender: Gender;
 
     @IsNotEmpty({message: 'Please enter a valid age'})
-    @Length(3)
+    @Length(2,3)
     age:number;
 
     @IsNotEmpty({message: 'status should not be empty'})
     status:string;
 
 
-   // @IsString()
-   // @IsJpeg({ message: 'Profile picture must have JPG extension' })
-    //sprofilePicture?: string;
-
-
-
     @IsString({ message: 'Phone number should be a string' })
     @Matches(/^[0-9]+$/, { message: 'Phone number must contain only numbers' })
     phoneNumber: string;
+
+    //filename:string;
 }
