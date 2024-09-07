@@ -18,6 +18,5 @@ export class ReviewEntity {
   @OneToOne(() => customerentity, customerentity => customerentity.review)
   customerentity:customerentity
 
-  //@ManyToOne(() => customerentity, customer => customer.reviews)
-  //customerentity: customerentity;
+ 
 }

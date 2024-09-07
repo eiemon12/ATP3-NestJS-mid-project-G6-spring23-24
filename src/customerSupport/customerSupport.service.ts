@@ -5,7 +5,7 @@ import { customerSupportDTO } from './customerSupport.dto';
 import { customerSupport } from './entity/customerSupport.entity';
 import { busEntity } from './entity/bus.entity';
 import * as bcrypt from 'bcrypt';
-import { MailerService } from '@nestjs-modules/mailer';
+//import { MailerService } from '@nestjs-modules/mailer';
 import { user } from './entity/user.entity';
 import { userDTO } from './user.dto';
 
@@ -14,7 +14,7 @@ export class customerSupportService {
     constructor(
         @InjectRepository(customerSupport)
         private csRepository: Repository<customerSupport>,
-        private mailerService: MailerService,
+        //private mailerService: MailerService,
         @InjectRepository(busEntity) 
         private busRepository: Repository<busEntity>,
         @InjectRepository(user) 
@@ -92,13 +92,13 @@ export class customerSupportService {
         return file.filename;
     }
 
-    async sendEmail(csData): Promise<void> {
+    /*async sendEmail(csData): Promise<void> {
         await this.mailerService.sendMail({
             to: csData.email,
             subject: csData.subject,
             text: csData.text, 
         });
-    }
+    }*/
 
     async createUser(users: userDTO): Promise<user> {
         const salt = await bcrypt.genSalt();

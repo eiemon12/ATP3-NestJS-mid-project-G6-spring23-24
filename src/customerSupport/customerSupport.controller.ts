@@ -64,10 +64,10 @@ export class customerSupportController {
         }
     }
 
-    @Post('/sendemail')
+    /*@Post('/sendemail')
     sendEmail(@Body() mydata){
     return this.customerSupportService.sendEmail(mydata);
-    }
+    }*/
 
     @Post('createUser')
     @UsePipes(new ValidationPipe())

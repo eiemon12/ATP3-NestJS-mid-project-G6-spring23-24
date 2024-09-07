@@ -5,11 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {customerentity} from './customerentity.entity';
 import { ReviewEntity } from './review.entity';
 import{vehicelentity} from './vehicelentity.entity';
-import { MailerModule } from '@nestjs-modules/mailer';
+import { Bookingentity } from './booking.entity';
+//import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([customerentity,vehicelentity,ReviewEntity]),
-  MailerModule.forRoot({
+  imports: [TypeOrmModule.forFeature([customerentity,vehicelentity,ReviewEntity,Bookingentity])
+ /* MailerModule.forRoot({
     transport: {
       host: 'smtp.gmail.com',
                port: 465,
@@ -20,7 +21,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
                    pass: 'ifzm uqvs qnjh brgp'
                },
               }
-  }),
+  }),*/
 ],
   controllers: [CustomerController],
   providers: [CustomerService],

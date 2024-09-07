@@ -4,7 +4,8 @@ import {
   Delete,UsePipes,ValidationPipe,
    Patch,UseGuards,Session,UploadedFile,
    UnauthorizedException,UseInterceptors,
-   MaxFileSizeValidator,FileTypeValidator,ParseFilePipe} from '@nestjs/common';
+   MaxFileSizeValidator,FileTypeValidator,ParseFilePipe,
+   ParseIntPipe} from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import{CustomerDTO} from'./customer.dto';
 import{reviewDTO} from './reviewDTO.dto';
@@ -16,6 +17,8 @@ import{vehicelentity} from './vehicelentity.entity';
 import { SessionGuard } from 'src/customer/session.guard';
 import * as bcrypt from 'bcrypt';
 import { promises } from 'dns';
+import { Bookingentity } from './booking.entity';
+import { CreateBookingDto } from './bookingDTO.dto';
 import session from 'express-session';
 
 
@@ -33,7 +36,7 @@ export class CustomerController {
       }
 
       @Post('login')
-     @UseGuards(SessionGuard)
+    // @UseGuards(SessionGuard)
       async login(@Session()session, @Body() logindata:CustomerDTO): Promise<object> {
         try{ 
           const user=await this.customerService.getcustomerbyemail(logindata['email']);
@@ -56,41 +59,55 @@ export class CustomerController {
 
 
 
+     @Post('booking')
+    async createBooking(@Body() createBookingDto: CreateBookingDto): Promise<Bookingentity> {
+      return this.customerService.createBooking(createBookingDto);
+    }
+
+
+
       @Post('createprofile')
-      @UseGuards(SessionGuard)
+     // @UseGuards(SessionGuard)
       @UsePipes(new ValidationPipe())
       async createpro(@Body() customerentity: customerentity): Promise<customerentity>{
         return await this.customerService.createpro(customerentity);
       }
 
 
-     @Put('update/:username')
-  @UseGuards(SessionGuard)
-  async updateprofile(@Session() session, @Param('username') username: string, @Body() updateprofile: Partial<CustomerDTO>): Promise<CustomerDTO> {
-    if (session.email !== username) {
-      throw new UnauthorizedException('Unauthorized');
-    }else{
-      return await this.customerService.updateprofile(username, updateprofile);
+      @Get('profile/:email')
+      //@UseGuards(SessionGuard) // Assuming you have a guard for session authentication
+      async viewProfile(@Param("email") email): Promise<CustomerDTO> {
+        const userEmail = email;
+        if (!userEmail) {
+            throw new UnauthorizedException('User not logged in');
+        }
+
+        //console.log(123);
+        return await this.customerService.getCustomerByEmail(userEmail);
     }
-   
+
+    
+
+
+    @Patch('update/:email')
+  async updateProfile(
+    @Param('email') email: string,
+    @Body() customerDTO: Partial<customerentity>,
+  ): Promise<customerentity> {
+    try {
+      const updatedCustomer = await this.customerService.updateProfile(email, customerDTO);
+      return updatedCustomer;
+    } catch (error) {
+      throw new UnauthorizedException(error.message);
+    }
   }
 
 
-
-  /*@Delete('delete/:username')
-  @UseGuards(SessionGuard)
-  async deleteprofile(@Session() session, @Param('username') username: string, @Body() deleteprofile: Partial<CustomerDTO>): Promise<CustomerDTO> {
-    if (session.email !== username) {
-      throw new UnauthorizedException('Unauthorized');
-    }else{
-      return await this.customerService.deleteprofile(username, deleteprofile);
-    }
-   
-  }*/
+  
 
 
   @Delete('deleteprofile')
-    @UseGuards(SessionGuard)
+    //@UseGuards(SessionGuard)
     async deleteProfile(@Session() session): Promise<void> {
         const username = session.email;
         if (!username) {
@@ -103,7 +120,7 @@ export class CustomerController {
 
 
    
-      @UseGuards(SessionGuard) 
+     // @UseGuards(SessionGuard) 
       @Post('vehicellist')
       @UsePipes(new ValidationPipe)
       async vehicellist(@Body() vehicelentity: vehicelentity): Promise<vehicelentity>{
@@ -117,35 +134,18 @@ export class CustomerController {
       }
 
       @Get('searchvehicel/:vehicelNumber')
-      @UseGuards(SessionGuard)
+      //@UseGuards(SessionGuard)
       getsearhvehicel(@Param('vehicelNumber')vehicelNumber: string): Promise<vehicelentity>{
         return this.customerService.getsearhvehicel(vehicelNumber);
       }
 
 
-      /*@Get('viewevent')
-      getviewevent():object{}
-
-
-      /*@Get('viewticket')
-      getviewticket
-
-      @Post('purchase-ticket')
-      purchaseticket
-
-      @Delete('cancelticket')
-      cancelticket
-
-      @Post('contact')
-      contact
-
-      @Get('offer')
-      getoffer*/
+      
 
   
 
 
-       /* @Post('uploadfile')
+       @Post('uploadfile')
         @UseInterceptors(FileInterceptor('myfile',
         {storage:diskStorage({
           destination: './uploads',
@@ -154,7 +154,7 @@ export class CustomerController {
           }
         })
         }))
-        insertfile(@Body() mydto:CustomerDTO,@UploadedFile(  new ParseFilePipe({
+       /* insertfile(@Body() mydto:CustomerDTO,@UploadedFile(  new ParseFilePipe({
           validators: [
             new MaxFileSizeValidator({ maxSize: 160000 }),
             new FileTypeValidator({ fileType: 'png|jpg|jpeg|' }),
@@ -164,7 +164,7 @@ export class CustomerController {
         mydto.filename = file.filename;  
         console.log(mydto)
         return this.customerService.insertUser(mydto);
-        }*/
+        }
 
 
        /* @Post('review')
@@ -177,22 +177,51 @@ export class CustomerController {
 
 
 
-        @Post('review')
-      //@UseGuards(SessionGuard)
-      @UsePipes(new ValidationPipe())
-      async giveReview(@Session() session, @Body() reviewDTO: ReviewEntity): Promise<ReviewEntity> {
+        @Put('/rating/:email')
+      // @UsePipes(new ValidationPipe())
+      async giveReviews(@Param("email") email): Promise<object> {
+       // console.log(123);
         try {
-          if (!session.email) {
+          //console.log(123);
+          return {};
+          if (!email) {
             throw new UnauthorizedException('User not logged in');
           }else{
 
-            const username = session.email;
-            reviewDTO.username = username;
-            return await this.customerService.giveReview(reviewDTO);
+            const username = email;
+           // reviewDTO.username = username;
+           // return await this.customerService.giveReview(reviewDTO);
           }
         } catch (error) {
           throw new UnauthorizedException(error.message);
         }
+      }
+
+      @Post('/review/:email')
+      @UsePipes(new ValidationPipe())
+      async giveReview(@Param("email") email,@Body() reviewDTO:ReviewEntity): Promise<ReviewEntity> {
+
+        //console.log(email);
+        try {
+          //console.log(123);
+         // return {new ReviewEntity()};
+          if (false) {
+
+            throw new UnauthorizedException('User not logged in');
+          }else{
+
+            const username = email;
+            reviewDTO.username = username;
+            //console.log(123);
+           // console.log(reviewDTO);
+            const data=await this.customerService.giveReview(reviewDTO);
+            //console.log("data:",data);
+            return data;
+          }
+        } catch (error) {
+          throw new UnauthorizedException(error.message);
+        }
+       
       }
 
 

@@ -1,4 +1,4 @@
-import { Injectable,UnauthorizedException } from '@nestjs/common';
+import { Injectable,NotFoundException,UnauthorizedException } from '@nestjs/common';
 import { CustomerDTO } from './customer.dto';
 import { reviewDTO } from './reviewDTO.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,8 @@ import {Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { promises } from 'dns';
 import { CustomerSupportEntity } from 'src/customerSupport/customerSupport.entity';
+import { Bookingentity } from './booking.entity';
+import { CreateBookingDto } from './bookingDTO.dto';
 
 @Injectable()
 export class CustomerService {
@@ -16,12 +18,19 @@ export class CustomerService {
 
     @InjectRepository(customerentity) private customerRepository: Repository<customerentity>,
     @InjectRepository(vehicelentity) private vehicelRepository: Repository<vehicelentity>,
-    @InjectRepository(ReviewEntity) private reviewRepository: Repository<ReviewEntity>
+    @InjectRepository(ReviewEntity) private reviewRepository: Repository<ReviewEntity>,
+    @InjectRepository(Bookingentity)private bookingRepository: Repository<Bookingentity>,
+  ) {}
 
-  ){}
 
 
-  
+
+  async createBooking(createBookingDto: CreateBookingDto): Promise<Bookingentity> {
+    const booking = this.bookingRepository.create(createBookingDto);
+    return this.bookingRepository.save(booking);
+  }
+
+
 
 
   async customersignup(customerinfo){
@@ -49,6 +58,16 @@ export class CustomerService {
     return await this.customerRepository.findOne({where:{email}});
   }
 
+  async getCustomerByEmail(email: string): Promise<CustomerDTO | undefined> {
+    return await this.customerRepository.findOne({ where: { email } });
+}
+
+
+  //async getProfile(email: string): Promise<CustomerDTO | undefined>{
+  //const {id,fullName,username,password,gender,phoneNumber,status, ...response} = await this.findIfExists(email);
+   //return response;
+ // }
+
 
   async createpro(Cprofile:customerentity):Promise<customerentity>{
     const newprofile = this.customerRepository.create(Cprofile);
@@ -70,9 +89,9 @@ export class CustomerService {
     }
 
 
-  async updateprofile(username: string, updateprofile: Partial<CustomerDTO>): Promise<CustomerDTO> {
-    await this.customerRepository.update({ username }, updateprofile);
-    return this.customerRepository.findOne({ where: { username } });
+  async updateprofile(email: string, updateprofile: Partial<customerentity>): Promise<customerentity> {
+    await this.customerRepository.update({ email }, updateprofile);
+    return this.customerRepository.findOne({ where: { email} });
   }
 
   async deleteProfile(username: string): Promise<void> {
@@ -85,6 +104,23 @@ export class CustomerService {
     await this.customerRepository.delete(username);
     }*/
 
+
+
+
+    async updateProfile(email: string, updateProfile: Partial<customerentity>): Promise<customerentity> {
+      await this.customerRepository.update({ email }, updateProfile);
+      const updatedCustomer = await this.customerRepository.findOne({ where: { email } });
+  
+      if (!updatedCustomer) {
+        throw new NotFoundException('Customer not found');
+      }
+  
+      return updatedCustomer;
+    }
+
+
+
+    
 
     async giveReview(review: ReviewEntity): Promise<ReviewEntity> {
       return await this.reviewRepository.save(review);
